@@ -226,14 +226,17 @@ async function performOCR(imgElement) {
     await worker.terminate();
 
     // Parse findings
-    const text = ret.data.text;
+    const text = ret.data.text.toUpperCase();
     console.log("Raw OCR:", text);
+
+    // Check for Demo/Practice account
+    if (text.includes('DEMO') || text.includes('PRACTICE') || text.includes('VIRTUAL')) {
+        return "DEMO_DETECTED";
+    }
 
     // Find biggest valid price like number
     const numbers = text.match(/\d{4}\.\d{2}/g);
     if (numbers && numbers.length > 0) {
-        // Return the last one found (usually bottom most or top most)
-        // Try to filter for realistic gold prices (1800-3000) if possible, but fallback to any valid number
         return parseFloat(numbers[numbers.length - 1]);
     }
 
@@ -258,8 +261,14 @@ function combineLogic(price, colorData) {
     }
 
     // Price Fallback logic refinement
-    // REMOVED Fallback to enforce proper chart detection
-    // const displayPrice = price > 0 ? price : 2025.00;
+    if (price === "DEMO_DETECTED") {
+        return {
+            signal: "ERROR",
+            patterns: ["Demo Account Detected", "Analysis only available for Real Accounts"],
+            entry: 0, tp: 0, sl: 0
+        };
+    }
+
     const displayPrice = price;
 
     if (displayPrice === 0) {
@@ -278,11 +287,11 @@ function combineLogic(price, colorData) {
     const volatilityFactor = (Math.abs(colorData.greenIntensity - colorData.redIntensity) / 100000) || 5;
 
     if (signal === "BUY") {
-        tp = entry + (5.00 + volatilityFactor);
-        sl = entry - (3.00 + volatilityFactor / 2);
+        tp = entry + (7.00 + volatilityFactor);
+        sl = entry - (2.00 + volatilityFactor / 4);
     } else if (signal === "SELL") {
-        tp = entry - (5.00 + volatilityFactor);
-        sl = entry + (3.00 + volatilityFactor / 2);
+        tp = entry - (7.00 + volatilityFactor);
+        sl = entry + (2.00 + volatilityFactor / 4);
     } else {
         tp = 0; sl = 0;
     }
@@ -331,3 +340,28 @@ function resetApp() {
     patternList.innerHTML = '';
     livePrice.textContent = "--.--";
 }
+
+// Security: Prevent Right Click
+document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+// Security: Detect Screen Capture / Focus Loss
+const securityOverlay = document.getElementById('security-overlay');
+
+window.addEventListener('blur', () => {
+    document.body.style.filter = 'blur(20px)';
+    if (securityOverlay) securityOverlay.style.display = 'flex';
+});
+
+window.addEventListener('focus', () => {
+    document.body.style.filter = 'none';
+    if (securityOverlay) securityOverlay.style.display = 'none';
+});
+
+// Security: Print Protection (Wait for print)
+window.onbeforeprint = () => {
+    document.body.style.display = 'none';
+};
+window.onafterprint = () => {
+    document.body.style.display = 'block';
+};
+
