@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sniper Trader Pro - XAUUSD Master</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Rajdhani:wght@300;500;700&display=swap"
+        rel="stylesheet">
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+</head>
+
+<body>
+    <div class="sniper-container">
+        <header>
+            <div class="logo">
+                <a href="https://www.snipertrader.pro/" target="_blank" style="text-decoration: none; color: inherit;">
+                    <span class="crosshair-icon">⌖</span> SNIPER TRADER PRO
+                </a>
+            </div>
+            <div class="header-right">
+                <div class="ticker">
+                    XAUUSD: <span id="live-price" class="neon-text">--.--</span>
+                </div>
+                <!-- AI Settings Removed -->
+            </div>
+        </header>
+
+        <main>
+            <div class="upload-zone" id="drop-zone">
+                <div class="crosshair-corner top-left"></div>
+                <div class="crosshair-corner top-right"></div>
+                <div class="crosshair-corner bottom-left"></div>
+                <div class="crosshair-corner bottom-right"></div>
+
+                <input type="file" id="chartInput" accept="image/*" hidden>
+                <div class="upload-content">
+                    <span class="upload-icon">⬆</span>
+                    <h2>UPLOAD CHART</h2>
+                    <p>Drag & Drop or Click to Analyze</p>
+                    <div class="or-divider">- OR -</div>
+                    <button id="open-camera-btn" class="camera-btn">📷 OPEN CAMERA</button>
+                </div>
+            </div>
+
+            <div id="camera-modal" class="modal hidden">
+                <div class="camera-container">
+                    <video id="camera-feed" autoplay playsinline></video>
+                    <canvas id="camera-canvas" hidden></canvas>
+                    <button id="capture-btn" class="capture-btn"></button>
+                    <button id="close-camera-btn" class="close-camera">✕</button>
+                </div>
+            </div>
+
+            <div id="scanning-overlay" class="hidden">
+                <div class="scanner-container">
+                    <img id="scan-preview-img" src="" alt="Scanning..." class="scan-bg-image">
+                    <div class="laser-beam"></div>
+                    <div class="grid-overlay"></div>
+                </div>
+                <p class="scanning-text">ANALYZING MARKET PSYCHOLOGY...</p>
+            </div>
+
+            <div id="result-dashboard" class="hidden">
+                <div class="dashboard-grid">
+                    <div class="chart-preview-panel">
+                        <h3>Captured Chart</h3>
+                        <div class="image-wrapper">
+                            <img id="uploaded-image" src="" alt="Analyzed Chart">
+                            <div class="overlay-points"></div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-panel">
+                        <div class="signal-box">
+                            <h2 id="trade-signal">WAITING...</h2>
+                            <div class="levels">
+                                <div class="level-card tp-card">
+                                    <span class="label">TAKE PROFIT</span>
+                                    <span class="value" id="tp-price">0.00</span>
+                                </div>
+                                <div class="level-card entry-card">
+                                    <span class="label">ENTRY</span>
+                                    <span class="value" id="entry-price">0.00</span>
+                                </div>
+                                <div class="level-card sl-card">
+                                    <span class="label">STOP LOSS</span>
+                                    <span class="value" id="sl-price">0.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="details-box">
+                            <h3><span class="icon">📊</span> Analysis Report</h3>
+                            <ul id="pattern-list">
+                                <!-- JS populated list -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <button id="reset-btn" class="retry-btn">ANALYZE NEW CHART</button>
+            </div>
+        </main>
+
+        <footer>
+            <p>Sheikh Rasel Robin SystemV1.6</p>
+        </footer>
+        <div id="settings-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>SYSTEM CONFIGURATION</h2>
+                    <span class="close-modal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <label for="api-key">Gemini API Key (Required for Vision):</label>
+                    <input type="password" id="api-key" placeholder="Enter your Google Gemini API Key here...">
+                    <p class="crypto-note">Your key is stored locally in your browser.</p>
+                </div>
+                <button id="save-api-key" class="retry-btn full-width">ACTIVATE SYSTEM</button>
+            </div>
+        </div>
+    </div>
+    <script src="sniper-logic.js"></script>
+</body>
+
+</html>
