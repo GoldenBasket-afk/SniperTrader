@@ -121,13 +121,18 @@ async function startAlgorithmicAnalysis(imgElement) {
         const colorAnalysis = analyzeColors(imgElement);
 
         // 2. Text/Price Analysis (Slow) - Run with timeout fallback
-        scanningText.textContent = "READING PRICE NUMBERS (OCR)...";
+        scanningText.textContent = "Analysis...";
+
+        // Random Delay 3 - 10 Seconds
+        const delay = Math.floor(Math.random() * (10000 - 3000 + 1)) + 3000;
+        await new Promise(resolve => setTimeout(resolve, delay));
+
         let ocrPrice = 0;
         try {
             // Timeout OCR after 5 seconds to prevent hanging
             ocrPrice = await Promise.race([
                 performOCR(imgElement),
-                new Promise((_, reject) => setTimeout(() => resolve(0), 5000))
+                new Promise((resolve) => setTimeout(() => resolve(0), 5000))
             ]);
         } catch (e) {
             console.warn("OCR Skipped/Failed", e);
