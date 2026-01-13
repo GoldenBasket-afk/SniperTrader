@@ -197,50 +197,54 @@ function analyzeColors(imgElement) {
 
 // 2. OCR Logic using Tesseract.js (Heavy)
 async function performOCR(imgElement) {
-    // Return mock price if Tesseract fails to load
     if (typeof Tesseract === 'undefined') return 0;
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
-    // Crop: Right 20% (Price Scale) - Increased slightly for better text capture
+    // --- STEP 1: Global Keyword Scan (Demo/Practice) ---
+    // We scan the top 30% of the image first where account info usually lives
+    canvas.width = imgElement.naturalWidth;
+    canvas.height = Math.floor(imgElement.naturalHeight * 0.3);
+    ctx.filter = 'grayscale(100%) contrast(150%)';
+    ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+
+    let worker = await Tesseract.createWorker('eng');
+    let ret = await worker.recognize(canvas.toDataURL());
+    let text = ret.data.text.toUpperCase();
+    console.log("Keyword Scan (Top 30%):", text);
+
+    if (text.includes('DEMO') || text.includes('PRACTICE') || text.includes('VIRTUAL') || text.includes('CONTEST')) {
+        await worker.terminate();
+        return "DEMO_DETECTED";
+    }
+
+    // --- STEP 2: Price Detection (Right Scale) ---
     const cropWidth = Math.floor(imgElement.naturalWidth * 0.20);
     const cropHeight = imgElement.naturalHeight;
     const cropX = imgElement.naturalWidth - cropWidth;
 
     canvas.width = cropWidth;
     canvas.height = cropHeight;
-
-    // Filter: High Contrast for better reading
     ctx.filter = 'grayscale(100%) contrast(150%)';
     ctx.drawImage(imgElement, cropX, 0, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
 
-    const croppedImage = canvas.toDataURL();
-
-    const worker = await Tesseract.createWorker('eng');
     await worker.setParameters({
-        tessedit_char_whitelist: '0123456789.', // Only look for numbers
+        tessedit_char_whitelist: '0123456789.',
     });
 
-    const ret = await worker.recognize(croppedImage);
+    ret = await worker.recognize(canvas.toDataURL());
     await worker.terminate();
 
-    // Parse findings
-    const text = ret.data.text.toUpperCase();
-    console.log("Raw OCR:", text);
+    text = ret.data.text.toUpperCase();
+    console.log("Price OCR:", text);
 
-    // Check for Demo/Practice account
-    if (text.includes('DEMO') || text.includes('PRACTICE') || text.includes('VIRTUAL')) {
-        return "DEMO_DETECTED";
-    }
-
-    // Find biggest valid price like number
     const numbers = text.match(/\d{4}\.\d{2}/g);
     if (numbers && numbers.length > 0) {
         return parseFloat(numbers[numbers.length - 1]);
     }
 
-    return 0; // Failed to find proper price
+    return 0;
 }
 
 
